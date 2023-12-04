@@ -1,0 +1,89 @@
+name: Workflow To Deploy To Staging Server (EC2)
+
+# run name for the workflow
+run-name: ${{github.actor}} initiated the workflow - Deploy To Staging
+
+# when to trigger the workflow
+on:
+  push:
+    branches:
+      - main
+
+# what to do once the workflow is triggered
+jobs:
+  deploy:
+    # enviroment for the runners
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checking Out
+        uses: actions/checkout@v4
+        
+        # setting up NodeJS on the runner
+      - name: Setting Up Node JS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+        
+      - name: Testing Node Installation
+        run:  |
+          node --version
+      
+      # installing any dependencies
+      - name: Install dependencies
+        run:  |
+          npm install
+
+      # building the project (checking for build errors)
+      - name: Building Project
+        run: |
+          npm run build-react
+
+      # running unit tests on the application
+      - name: Testing The Project
+        run: |
+          npm run test-react
+
+      # performing linting in the applcation
+      - name: Linting In The Project
+        run: |
+          npx eslint src/sum.js src/cartview.js src/shippingOptions.js
+
+      # Deploy All Changes To The Staging Server
+      - name: Deploy To Changes To Staging Server
+        uses: burnett01/rsync-deployments@6.0.0
+        with:
+          switches: -avzr --delete
+          path: ./*
+          remote_path: ~/
+          remote_host: 51.20.114.217
+          remote_user: ubuntu
+          remote_key: ${{ secrets.SSH_KEY }}
+
+      # Install Any New Dependencies
+      - name: Installing Node Modules
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: 51.20.114.217
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            npm install
+
+      - name: Notify on success/failure
+        if: always()
+        uses: dawidd6/action-send-mail@v2
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          # user credentials
+          username: talhayounas0348@gmail.com
+          password: ${{ secrets.MAIL_CONNECTION }}
+          # email subject
+          subject: ${{ github.job }} job of ${{ github.repository }} has ${{ job.status }}
+          # email body as text
+          body: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }}
+          # comma-separated string, send email to
+          to: u2020497@giki.edu.pk,sajid.ali@giki.edu.pk
+          # from email name
+          from: Talha Yunus
