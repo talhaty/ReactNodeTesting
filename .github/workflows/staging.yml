@@ -7,7 +7,7 @@ run-name: ${{github.actor}} initiated the workflow - Deploy To Staging
 on:
   push:
     branches:
-      - main
+      - test
 
 # what to do once the workflow is triggered
 jobs:
