@@ -70,28 +70,21 @@ jobs:
 
       # notifying the QA and the Developer on workflow sucess.
       - name: Notify on success
-        if: success()
-        uses: dawidd6/action-send-mail@v3
+        if: always()
+        uses: dawidd6/action-send-mail@v2
         with:
-          connection_url: ${{secrets.MAIL_CONNECTION}}
           server_address: smtp.gmail.com
           server_port: 465
-          secure: true
-          subject: Github Action Sucess
-          to: talhayounas0348@gmail.com
-          from: talhayounas0348@gmail.com
-          body: Workflow of ${{github.repository}} initiated by ${{github.actor}} was sucessfully executed. View the changes on the server http://51.20.114.217/
+          # user credentials
+          username: ${{ talhayounas0348@gmail.com }}
+          password: ${{ secrets.PASSWORD }}
+          # email subject
+          subject: ${{ github.job }} job of ${{ github.repository }} has ${{ job.status }}
+          # email body as text
+          body: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }}
+          # comma-separated string, send email to
+          to: u2020497@giki.edu.pk,sajid.ali@giki.edu.pk
+          # from email name
+          from: Talha Yunus
 
-      # notifying the QA and the Developer on workflow sucess.
-      - name: Notify on Failure
-        if: failure()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          connection_url: ${{secrets.MAIL_CONNECTION}}
-          server_address: smtp.gmail.com
-          server_port: 465
-          secure: true
-          subject: Github Action Failure
-          to: talhayounas0348@gmail.com
-          from: talhayounas0348@gmail.com
-          body: Workflow of ${{github.repository}} initiated by ${{github.actor}} failed, kindly check the workflow logs!
+      
