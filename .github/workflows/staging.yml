@@ -69,7 +69,8 @@ jobs:
           port: 22
           script: |
             npm install
-            npm run start &
+            npm install -g pm2
+            pm2 start npm -- start
 
       - name: Notify on success/failure
         if: always()
